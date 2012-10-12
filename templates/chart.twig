@@ -15,7 +15,12 @@ body {
     </script>
     <![endif]-->
 
-    <!-- <script type="text/javascript" src="/static/vendor/innersvg/innersvg.js"></script> -->
+    {% if innersvg %}
+    <script type="text/javascript" src="/static/vendor/innersvg/innersvg.js"></script>
+    <style>
+        body { padding: 0!important;}
+    </style>
+    {% endif %}
 
 
 {% for src in stylesheets %}
@@ -46,7 +51,7 @@ body {
 
         var reload_timer;
 
-        if (!$.browser.msie) {
+        if (!$.browser.msie && navigator.userAgent.match(/iPad/i) == null) {
             // IE continuosly reloads the chart for some strange reasons
             $(window).resize(function() {
                 if (reload_timer) clearTimeout(reload_timer);

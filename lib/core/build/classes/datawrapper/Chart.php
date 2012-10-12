@@ -64,7 +64,7 @@ class Chart extends BaseChart {
     }
 
     public function preSave(PropelPDO $con = null) {
-        $this->setLastModifiedAt(time());
+        if ($this->isModified()) $this->setLastModifiedAt(time());
         return true;
     }
 
@@ -165,7 +165,7 @@ class Chart extends BaseChart {
 
     public function isPublic() {
         // 1 = upload, 2 = describe, 3 = visualize, 4 = publish, 5 = published
-        return !$this->getDeleted() && $this->getLastEditStep() >= 3;
+        return !$this->getDeleted() && $this->getLastEditStep() > 3;
     }
 
     public function getLocale() {

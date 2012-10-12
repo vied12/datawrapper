@@ -3,9 +3,6 @@
 
 {{ parent() }}
 
-<!--<script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script>
-<script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>-->
-
 <script type="text/javascript">
 $(function() {
 
@@ -133,10 +130,22 @@ $(function() {
 
             {% if user.isAbleToPublish %}
 
-            <p>{% trans "Congrats, you made it! Now is the time to check back everything. You can return to the previous steps." %}</p>
+            {% if chart.publishedAt < chart.lastModifiedAt %}
+                <div class="alert alert-warning">
+                    <p>{% trans "You have changed the chart after its last publication. To make you changes visible, please re-publish the chart." %}</p>
+                    <a href="?republish=1" class="btn"><i class="icon-refresh"></i> {% trans "Re-publish chart!" %}</a>
+                </div>
+
+            {% elseif chart.lastEditStep == 3 %}
+                <p class="alert alert-success">{% trans "Congrats, you made it! The chart has been published." %}</p>
+            {% else %}
+            {% endif %}
+
+            
+
 
             <h3>{% trans "Link to this visualisation" %}</h3>
-            <p><a href="http://{{ DW_DOMAIN }}/chart/{{ chart.id }}">http://{{ DW_DOMAIN }}/chart/{{ chart.id }}</a></p>
+            <p><a href="http://{{ DW_CHART_CACHE_DOMAIN }}/{{ chart.id }}">http://{{ DW_CHART_CACHE_DOMAIN }}/{{ chart.id }}</a></p>
 
             <h3>{% trans "Embed into your website" %}</h3>
             <p>{% trans "Just copy &amp; paste the following code into your website." %}</p>
@@ -144,7 +153,7 @@ $(function() {
                 <label>{% trans "Width" %}: <input type="text" id="embed-width" class="input-small" style="width:4ex" value="600" /> px</label>&nbsp;&nbsp;
                 <label>{% trans "Height" %}: <input type="text" id="embed-height" class="input-small" style="width:4ex" value="400" /> px</label>
 
-            <textarea id="iframe-code" class="span4" rows="5"><iframe src="http://{{ DW_DOMAIN }}/chart/{{ chart.id }}" frameborder="0" allowtransparency="true" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen width="{{ chart.metadata.publish['embed-width'] }}" height="{{ chart.metadata.publish['embed-height'] }}"></iframe></textarea>
+            <textarea id="iframe-code" class="span4" rows="5"><iframe src="http://{{ DW_CHART_CACHE_DOMAIN }}/{{ chart.id }}" frameborder="0" allowtransparency="true" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen width="{{ chart.metadata.publish['embed-width'] }}" height="{{ chart.metadata.publish['embed-height'] }}"></iframe></textarea>
 
              <h3>{% trans "Make it public" %}</h3>
              <p>{% trans "You can show some love to Datawrapper by agreeing to show your visualisation in our <a href='gallery.html'>public gallery</a>" %}. {% trans "This is absolutely optional." %}</p>
@@ -203,7 +212,7 @@ $(function() {
         <div class="span12">
             <div class="form-actions">
                 <a class="submit pull-right btn" href="/chart/create"><i class="icon-pencil"></i> {% trans "Create another graphic" %}</a>
-                <a class="submit duplicate pull-right btn" style="margin-right:10px"><i class="icon-plus"></i> {% trans "Duplicate this chart" %}</a>
+                {% if user.isAbleToPublish %}<a class="submit duplicate pull-right btn" style="margin-right:10px"><i class="icon-plus"></i> {% trans "Duplicate this chart" %}</a>{% endif %}
                 <a class="submit btn" href="visualize"><i class="icon-chevron-left"></i> {% trans "Return to visualise step" %}</a>
             </div>
         </div>

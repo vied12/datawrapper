@@ -4,9 +4,12 @@
  * Datawrapper main index
  *
  */
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+
+// include datawrapper session serialization
+require '../lib/session/Datawrapper.php';
+
 
 // Require the Slim PHP 5 Framework
 require '../vendor/Slim/Slim.php';
@@ -22,10 +25,10 @@ set_include_path("../lib/core/build/classes" . PATH_SEPARATOR . get_include_path
 require_once '../vendor/Slim-Extras/Views/TwigView.php';
 TwigView::$twigDirectory = '../vendor/Twig';
 
-// include datawrapper session serialization
-require '../lib/session/Datawrapper.php';
+// load YAML parser and config
+require_once '../vendor/spyc/spyc.php';
+$GLOBALS['dw_config'] = Spyc::YAMLLoad('../config.yaml');
 
-require '../config.php';
 
 $app = new Slim(array(
     'view' => new TwigView(),
@@ -51,26 +54,6 @@ function toJSON($arr) {
 $twig->addExtension(new Twig_Extension_I18n());
 
 require_once '../lib/utils/i18n.php';
-
-
-function get_metric_prefix($locale) {
-    switch (substr($locale, 0, 2)) {
-        case 'de':
-            $pre = array();
-            $pre[3] = ' Tsd.';
-            $pre[6] = ' Mio.';
-            $pre[9] = ' Mrd.';
-            $pre[12] = ' Bio.';
-            return $pre;
-        default:
-            $pre = array();
-            $pre[3] = 'k';
-            $pre[6] = 'm';
-            $pre[9] = 'b';
-            $pre[12] = 't';
-            return $pre;
-    }
-}
 
 
 function add_header_vars(&$page, $active = null) {
@@ -102,10 +85,10 @@ function add_header_vars(&$page, $active = null) {
         ), array(
             'url' => '#lang-fr-FR',
             'title' => 'Français'
-        ), array(
+        )/*, array(
             'url' => '#lang-es-ES',
             'title' => 'Español'
-        )),
+        )*/),
         'title' => _('Language'),
         'icon' => 'font'
     );
@@ -148,8 +131,9 @@ function add_header_vars(&$page, $active = null) {
     $page['user'] = DatawrapperSession::getUser();
     $page['language'] = substr(DatawrapperSession::getLanguage(), 0, 2);
     $page['locale'] = DatawrapperSession::getLanguage();
-    $page['DW_DOMAIN'] = DW_DOMAIN;
-    $page['ADMIN_EMAIL'] = ADMIN_EMAIL;
+    $page['DW_DOMAIN'] = $GLOBALS['dw_config']['domain'];
+    $page['DW_CHART_CACHE_DOMAIN'] = $GLOBALS['dw_config']['chart_domain'];
+    $page['ADMIN_EMAIL'] = $GLOBALS['dw_config']['admin_email'];
 }
 
 
@@ -203,3 +187,5 @@ $app->get('/phpinfo', function() use ($app) {
  * the Slim application using the settings and routes defined above.
  */
 $app->run();
+
+

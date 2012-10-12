@@ -20,13 +20,6 @@ class DatawrapperSession {
      * creates a new instance
      */
     function __construct() {
-        if (isset($_SESSION['dw-lang'])) {
-            $this->lang = $_SESSION['dw-lang'];
-        } else {
-            // default language is english
-            $this->lang = 'en';
-        }
-
         $this->initUser();
     }
 
@@ -36,6 +29,7 @@ class DatawrapperSession {
         $lifetime = 86400 * 30;  // 30 days
         session_set_cookie_params($lifetime);
         session_name($ses);
+        //if(!session_id()) session_regenerate_id();
         session_start();
 
         // Reset the expiration time upon page load
@@ -55,18 +49,35 @@ class DatawrapperSession {
             $user = new User();
             $user->setEmail('guest@datawrapper.de');
             $user->setRole('guest');
-            $user->setLanguage($this->lang);
+            $user->setLanguage(self::getBrowserLocale());
             $this->user = $user;
         }
     }
 
     public function _toArray() {
-        $res = array('lang' => $this->lang, 'user' => $this->user->toArray());
+        $res = array('user' => $this->user->toArray());
         return $res;
     }
 
     public static function toArray() {
         return self::getInstance()->_toArray();
+    }
+
+    public static function getBrowserLocale() {
+        // get list of available locales
+        $available_locales = array();
+        foreach (glob('../locale/*', GLOB_ONLYDIR) as $l) {
+            $available_locales[] = substr($l, 10);
+        }
+        $locales = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']) : array();
+        foreach ($locales as $loc) {
+            $parts = explode(';', $loc);
+            $pp = explode('-', $parts[0]);
+            if (count($pp) > 1) $pp[1] = strtoupper($pp[1]);
+            $locale = implode('_', $pp);
+            if (in_array($locale, $available_locales)) return $locale;  // match!
+        }
+        return 'en';
     }
 
     /**
@@ -76,7 +87,7 @@ class DatawrapperSession {
         if (self::getUser()->isLoggedIn()) {
             return self::getUser()->getLanguage();
         } else {
-            return isset($_SESSION['dw-lang']) ? $_SESSION['dw-lang'] : 'en';
+            return isset($_SESSION['dw-lang']) ? $_SESSION['dw-lang'] : self::getBrowserLocale();
         }
         // TODO: load user setting from database for logged users
     }
@@ -121,7 +132,7 @@ class DatawrapperSession {
         Action::logAction(self::getInstance()->user, 'logout');
         $_SESSION['dw-user-id'] = null;
         self::getInstance()->initUser();
-        setcookie('dw-session');
+        setcookie('DW-SESSION', null, 0, '/');
     }
 
 
@@ -138,3 +149,4 @@ class DatawrapperSession {
 }
 
 DatawrapperSession::initSession();
+
