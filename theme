@@ -35,9 +35,13 @@ CREATE_SYNTAX = "theme create <id>"
 def create_symlink(source, destination, force=False):
 	if os.path.exists(destination):
 		if force:
-			moved_file = "%s.backup-%s" % (destination, uuid.uuid4())
-			os.rename(destination, moved_file)
-			print "the template %s already exists. We moved it to %s" % (destination, moved_file)
+			save = raw_input("the template %s already exists. Do you want a backup? [y/n]\n" % destination) == 'y'
+			if save:
+				moved_file = "%s.backup-%s" % (destination, uuid.uuid4())
+				os.rename(destination, moved_file)
+				print " We saved it to %s" % (moved_file)
+			else:
+				os.remove(destination)
 		else:
 			raise Exception("the template %s already exists. Do a './theme update'" % destination)
 	os.symlink(template_file, destination)
