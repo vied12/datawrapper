@@ -3,18 +3,26 @@
 /**
  * API: get list of all charts by the current user
  */
-$app->get('/charts', function() {
+$app->get('/charts', function() use ($app) {
     $user = DatawrapperSession::getUser();
     if ($user->isLoggedIn()) {
-        $charts = ChartQuery::create()->getPublicChartsByUser($user);
-        $res = array();
-        foreach ($charts as $chart) {
-            $res[] = $chart->shortArray();
+        $filter = array();
+        if ($app->request()->get('filter')) {
+            $f = explode("|", $app->request()->get('filter'));
+            foreach ($f as $e) {
+                list($key, $val) = explode(":", $e);
+                $filter[$key] = $val;
+            }
         }
-        ok($res);
+        $charts = ChartQuery::create()->getPublicChartsByUser($user, $filter, 0, 200, $app->request()->get('order'));
     } else {
-        error('need-login', 'You need to be logged in to do that');
+        $charts = ChartQuery::create()->getGuestCharts();
     }
+    $res = array();
+    foreach ($charts as $chart) {
+        $res[] = $app->request()->get('expand') ? $chart->serialize() : $chart->shortArray();
+    }
+    ok($res);
 });
 
 /**
@@ -90,6 +98,17 @@ function if_chart_is_writable($chart_id, $callback) {
             error('access-denied', $res);
         }
     } else {
+        error('no-such-chart', '');
+    }
+}
+
+
+function if_chart_exists($id, $callback) {
+    $chart = ChartQuery::create()->findPK($id);
+    if ($chart) {
+        call_user_func($callback, $chart);
+    } else {
+        // no such chart
         error('no-such-chart', '');
     }
 }
@@ -215,6 +234,8 @@ $app->post('/charts/:id/copy', function($chart_id) use ($app) {
     if_chart_is_writable($chart_id, function($user, $chart) use ($app) {
         try {
             $copy = ChartQuery::create()->copyChart($chart);
+            $copy->setUser(DatawrapperSession::getUser());
+            $copy->save();
             ok(array('id' => $copy->getId()));
         } catch (Exception $e) {
             error('io-error', $e->getMessage());
@@ -463,5 +484,30 @@ $app->put('/charts/:id/thumbnail/:thumb', function($chart_id, $thumb) use ($app)
             error('io-error', $e->getMessage());
         }
     });
+});
+
+/*
+ * stores static snapshot of a chart (data, configuration, etc) as JSON
+ * to /test/test-charts. This aims to simplify the generation of test
+ * cases using the Datawrapper editor. Only for debugging.
+ */
+$app->post('/charts/:id/store_snapshot', function($chart_id) use ($app) {
+    if (!empty($GLOBALS['dw_config']['debug_export_test_cases'])) {
+        if_chart_exists($chart_id, function($chart) use ($app) {
+            $json = $chart->serialize();
+            $payload = json_decode($app->request()->getBody(), true);
+            $name = $payload['id'];
+            $json['_data'] = $chart->loadData();
+            $json['_sig'] = $payload['signature'];
+            if (empty($name)) {
+                error('', 'no name specified');
+            } else {
+                $name = str_replace(" ", "-", $name);
+                $json['_id'] = $name;
+                file_put_contents("../../test/test-charts/" . $name . ".json", json_encode($json));
+                ok();
+            }
+        });
+    }
 });
 
