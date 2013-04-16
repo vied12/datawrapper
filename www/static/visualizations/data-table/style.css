@@ -3,6 +3,18 @@
  * basic styles for data tables
  *
  */
+
+html body #footer, html body.chart.fullscreen #footer {
+    position: relative;
+    top: auto;
+    left: auto;
+}
+
+html body.chart.fullscreen {
+    width    : auto    !important;
+    overflow : visible !important;
+}
+
 #datatable_wrapper {
     margin: 10px 0px 10px;
 }
