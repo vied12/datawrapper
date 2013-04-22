@@ -68,7 +68,6 @@ html body.chart.fullscreen {
     padding: 3px 20px;
 }
 
-#datatable tbody tr:nth-child(4n),
 #datatable tbody tr:last-child
  {
     border-bottom: 1px solid #aaa;
