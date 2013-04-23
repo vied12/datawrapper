@@ -147,6 +147,17 @@
             return !_.isArray(hl) || hl.length === 0 || _.indexOf(hl, col.name) >= 0;
         },
 
+        // hasRowHighlight: function() {
+        //     var hl = this.get('metadata.visualize.highlighted-rows');
+        //     return _.isArray(hl) && hl.length > 0;
+        // },
+
+        // isRowHighlighted: function(col) {
+        //     if (col === undefined) return false;
+        //     var hl = this.get('metadata.visualize.highlighted-rows');
+        //     return !_.isArray(hl) || hl.length === 0 || _.indexOf(hl, col.name) >= 0;
+        // },
+
         setLocale: function(locale, metric_prefix) {
             Globalize.culture(locale);
             this.locale = locale;

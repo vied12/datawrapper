@@ -194,11 +194,15 @@ $(function() {
         var sel = chart.get('metadata.visualize.highlighted-series');
         return _.isArray(sel) ? sel.slice() : [];
     }
+    function _getHighlightsRows() {
+        var sel = chart.get('metadata.visualize.highlighted-rows');
+        return _.isArray(sel) ? sel.slice() : [];
+    }
 
     function highlightSeriesClick(e) {
-        var badge = $(e.target).parents('.badge'),
-            series = badge.data('series'),
-            li = badge;
+        var badge    = $(e.target).parents('.badge'),
+            series   = badge.data('series'),
+            li       = badge,
             selected = _getHighlights();
         selected = _.without(selected, String(series));
         chart.set('metadata.visualize.highlighted-series', selected);
@@ -207,9 +211,24 @@ $(function() {
     }
     $('.highlighted-series .badge').click(highlightSeriesClick);
 
+     function highlightRowClick(e) {
+        var badge    = $(e.target).parents('.badge'),
+            row      = badge.data('row'),
+            li       = badge,
+            selected = _getHighlightsRows();
+        selected = _.without(selected, String(row));
+        chart.set('metadata.visualize.highlighted-rows', selected);
+        li.remove();
+        e.preventDefault();
+    }
+    console.log($('.highlighted-rows .badge'));
+    $('.highlighted-rows .badge').click(highlightRowClick);
+
     function onDatasetLoaded(ds) {
+        // HIGHLIGHT
         var s = $('#highlight-series'), s2 = $('.highlighted-series');
         s.find("option[value!='---']").remove();
+        // Fill the highlight selectbox with column names
         _.each(chart.dataSeries(), function(col) {
             s.append('<option>'+col.name+'</option>');
         });
@@ -232,6 +251,51 @@ $(function() {
                 s.val('---');
             }
         });
+        // Highlight rows
+        var $highlight_row        = $('#highlight-rows');
+        var $highlight_row_badges = $('.highlighted-rows');
+        var $badge_tmpl           = $("<span data-series=\"\" class=\"badge badge-info\"><i class=\"icon-remove icon-white\"></i></span>");
+        // Fill the highlight selectbox with row names
+        $highlight_row.find("option").remove();
+        $highlight_row.append('<option>---</option>');
+        _.each(chart.rowLabels(), function(row) {
+            $highlight_row.append('<option>'+row+'</option>');
+        });
+        // // Add the badge container
+        // $highlight_row_badges.insertAfter($highlight_row);
+        // // Add selected rows as badges in the container
+        // var selected_row = _getHighlightsRows();
+        // if (!_.isArray(selected_row)){ selected_row = [selected_row] } // we need an array
+        // for (var i=0; i<selected_row.length; i++) {
+        //     // create a badge and add it
+        //     var $badge = $badge_tmpl.clone().attr("data-row", selected_row[i]);
+        //     $badge.find("i").text(selected_row[i]);
+        //     $highlight_row_badges.append($badge);
+        // }
+        // Event on row selected: add row as badges, save it.
+        $highlight_row.change(function() {
+            // If already selected, we do nothing
+            if ($highlight_row.val() != "---") {
+                var selected = _getHighlightsRows();
+                if (_.indexOf(selected, $highlight_row.val()) >= 0) {
+                    $highlight_row.val('---');
+                    return;
+                }
+                // Add Badge
+                var $badge = $badge_tmpl.clone().attr("data-row", $highlight_row.val());
+                $badge.find("i").text($highlight_row.val());
+                $highlight_row_badges.append($badge);
+                // Bind click event
+                $badge.click(highlightSeriesClick);
+                // Save
+                selected.push($highlight_row.val());
+                console.log(selected);
+                chart.set('metadata.visualize.highlighted-rows', selected);
+                // Reset
+                $highlight_row.val('---');
+            }
+        });
+        // Update the iframe's size
         _.each(themes, function(theme) {
             if (theme.id == chart.get('theme')) {
                 var w = theme.default_width || 560,
@@ -467,6 +531,16 @@ $(function() {
                         <p class="highlighted-series">
                             {% for series in vismeta['highlighted-series'] %}
                             <span data-series="{{ series }}" class="badge badge-info"><i class="icon-remove icon-white"></i>{{ series }}</span>
+                            {% endfor %}
+                        </p>
+                        <div>
+                            <select id="highlight-rows" class="span2">
+                                <option value="---">- {% trans "select a row" %} -</option>
+                            </select>
+                        </div>
+                        <p class="highlighted-rows">
+                            {% for row in vismeta['highlighted-rows'] %}
+                            <span data-row="{{ row }}" class="badge badge-info"><i class="icon-remove icon-white"></i>{{ row }}</span>
                             {% endfor %}
                         </p>
                     </div>

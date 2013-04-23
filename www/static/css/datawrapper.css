@@ -889,14 +889,14 @@ dl.dl-horizontal dd {
     display: inline;
 }
 
-.highlighted-series .badge {
+.highlighted-series .badge, .highlighted-rows .badge {
     max-width: 100%;
     display: inline-block;
     overflow: hidden;
     text-overflow:ellipsis;
 }
 
-.highlighted-series .badge .icon-remove {
+.highlighted-series .badge .icon-remove, .highlighted-rows .badge .icon-remove {
     position: relative;
     left: -4px;
     top: 1px;

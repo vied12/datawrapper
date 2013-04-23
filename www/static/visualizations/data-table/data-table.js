@@ -48,8 +48,19 @@
             $('thead', table).append(tr);
             for (r = 0; r < me.chart.numRows(); r++) {
                 tr = $('<tr />');
+                var highlighted_rows = me.get('highlighted-rows');
                 if (me.chart.hasRowHeader()) {
-                    tr.append('<th>'+me.chart.rowLabel(r)+'</tr>');
+                    tr.append('<th>'+me.chart.rowLabel(r)+'</th>');
+                    // Highlight the row
+                    if (_.isArray(highlighted_rows) && _.indexOf(highlighted_rows, me.chart.rowLabel(r)) >= 0) {
+                        tr.addClass('highlight');
+                    }
+                } else { // Highlight the row
+                         // In this case, the chart has not row header, the value of me.get('table-highlight-row')
+                         // is like "Row <line number starting from 1>" (see rowLabels's definition in dw.chart.js)
+                    if (_.isArray(highlighted_rows) && _.indexOf(highlighted_rows, "Row "+(me.chart.rowLabel(r)+1)) >= 0) {
+                        tr.addClass('highlight');
+                    }
                 }
                 _.each(me.chart.dataSeries(), function(series, s) {
                     td = $('<td>'+me.chart.formatValue(series.data[r], true)+'</td>');
