@@ -189,7 +189,6 @@ $(function() {
         }
     });
 
-    // load dataset
     function _getHighlights() {
         var sel = chart.get('metadata.visualize.highlighted-series');
         return _.isArray(sel) ? sel.slice() : [];
@@ -209,7 +208,6 @@ $(function() {
         li.remove();
         e.preventDefault();
     }
-    $('.highlighted-series .badge').click(highlightSeriesClick);
 
      function highlightRowClick(e) {
         var badge    = $(e.target).parents('.badge'),
@@ -221,11 +219,13 @@ $(function() {
         li.remove();
         e.preventDefault();
     }
-    console.log($('.highlighted-rows .badge'));
+
+    // init the trigger on badges click
+    $('.highlighted-series .badge').click(highlightSeriesClick);
     $('.highlighted-rows .badge').click(highlightRowClick);
 
     function onDatasetLoaded(ds) {
-        // HIGHLIGHT
+        // Highlight series
         var s = $('#highlight-series'), s2 = $('.highlighted-series');
         s.find("option[value!='---']").remove();
         // Fill the highlight selectbox with column names
@@ -254,24 +254,13 @@ $(function() {
         // Highlight rows
         var $highlight_row        = $('#highlight-rows');
         var $highlight_row_badges = $('.highlighted-rows');
-        var $badge_tmpl           = $("<span data-series=\"\" class=\"badge badge-info\"><i class=\"icon-remove icon-white\"></i></span>");
+        var $badge_tmpl           = $("<span data-row=\"\" class=\"badge badge-info\"><i class=\"icon-remove icon-white\"></i></span>");
         // Fill the highlight selectbox with row names
         $highlight_row.find("option").remove();
         $highlight_row.append('<option>---</option>');
         _.each(chart.rowLabels(), function(row) {
             $highlight_row.append('<option>'+row+'</option>');
         });
-        // // Add the badge container
-        // $highlight_row_badges.insertAfter($highlight_row);
-        // // Add selected rows as badges in the container
-        // var selected_row = _getHighlightsRows();
-        // if (!_.isArray(selected_row)){ selected_row = [selected_row] } // we need an array
-        // for (var i=0; i<selected_row.length; i++) {
-        //     // create a badge and add it
-        //     var $badge = $badge_tmpl.clone().attr("data-row", selected_row[i]);
-        //     $badge.find("i").text(selected_row[i]);
-        //     $highlight_row_badges.append($badge);
-        // }
         // Event on row selected: add row as badges, save it.
         $highlight_row.change(function() {
             // If already selected, we do nothing
@@ -283,13 +272,12 @@ $(function() {
                 }
                 // Add Badge
                 var $badge = $badge_tmpl.clone().attr("data-row", $highlight_row.val());
-                $badge.find("i").text($highlight_row.val());
+                $badge.append($highlight_row.val());
                 $highlight_row_badges.append($badge);
                 // Bind click event
-                $badge.click(highlightSeriesClick);
+                $badge.click(highlightRowClick);
                 // Save
                 selected.push($highlight_row.val());
-                console.log(selected);
                 chart.set('metadata.visualize.highlighted-rows', selected);
                 // Reset
                 $highlight_row.val('---');
