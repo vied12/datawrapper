@@ -189,6 +189,12 @@ $(function() {
         } else if (key == 'theme') {
             _themeHasChanged = true;
         }
+        // Highlight series/rows (tableChart):
+        // If a serie or row is selected, disable the other type
+        if (key == 'metadata.visualize.highlighted-rows' ||
+            key == 'metadata.visualize.highlighted-series') {
+            toggleHighlights();
+        }
     });
 
     function _getHighlights() {
@@ -227,6 +233,18 @@ $(function() {
     $('.highlighted-series .badge').click(highlightSeriesClick);
     $('.highlighted-rows .badge').click(highlightRowClick);
 
+
+    // Highlight series/rows (tableChart) :
+    // If a serie or row is selected, disable the other type
+    function toggleHighlights() {
+        var $highlight_row   = $('#highlight-rows select');
+        var $highlight_serie = $('select#highlight-series');
+        var series = _getHighlights();
+        var rows   = _getHighlightsRows();
+        $highlight_serie.prop('disabled', (rows.length > 0));
+        $highlight_row.prop('disabled', (series.length > 0));
+    }
+
     // initialize the 'highlight a row' selectbox
     // Only for table chart type
     function initHighlightRow() {
@@ -237,6 +255,7 @@ $(function() {
            return; 
         }
         $highlight_row.show();
+        toggleHighlights(); // If a serie or row is selected, disable the other type
         var $highlight_row_select = $highlight_row.find('select');
         var $highlight_row_badges = $('.highlighted-rows');
         var $badge_tmpl           = $("<span data-row=\"\" class=\"badge badge-info\"><i class=\"icon-remove icon-white\"></i></span>"); // Ref: see ".highlighted-rows" element below
