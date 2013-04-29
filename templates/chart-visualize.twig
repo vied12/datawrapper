@@ -228,17 +228,17 @@ $(function() {
     $('.highlighted-rows .badge').click(highlightRowClick);
 
     // initialize the 'highlight a row' selectbox
-    // Only if chart for table chart type
+    // Only for table chart type
     function initHighlightRow() {
         var $highlight_row = $('#highlight-rows');
-        // Only if chart for table chart type
+        // Only for table chart type
         if (chart.get('type') != 'data-table') {
            $highlight_row.hide();
            return; 
         }
         $highlight_row.show();
         var $highlight_row_badges = $('.highlighted-rows');
-        var $badge_tmpl           = $("<span data-row=\"\" class=\"badge badge-info\"><i class=\"icon-remove icon-white\"></i></span>");
+        var $badge_tmpl           = $("<span data-row=\"\" class=\"badge badge-info\"><i class=\"icon-remove icon-white\"></i></span>"); // Ref: see ".highlighted-rows" element below
         // Fill the highlight selectbox with row names
         $highlight_row.find("option").remove();
         $highlight_row.append('<option>---</option>');
@@ -385,6 +385,7 @@ $(function() {
         folded = $('.vis-selector-folded'),
         thumbs = $('.vis-thumb'),
         selVis = $('.vis-selected');
+    // Inelegant. Need to show in order to get the real height value.
     unfolded.show().data('h', unfolded.height()).hide();
     thumbs.click(function(e) {
         var thumb = $(e.target);
@@ -525,6 +526,7 @@ $(function() {
                     </div>
 
                     <div class="story-highlight">
+                        <!-- Highlight serie -->
                         <label>{% trans "Highlight the most import data series:" %}</label>
                         <div>
                             <select id="highlight-series" class="span2">
@@ -536,6 +538,8 @@ $(function() {
                             <span data-series="{{ series }}" class="badge badge-info"><i class="icon-remove icon-white"></i>{{ series }}</span>
                             {% endfor %}
                         </p>
+                        <!-- Highlight rows -->
+                        <label>{% trans "Highlight the most import data rows:" %}</label>
                         <div>
                             <select id="highlight-rows" class="span2">
                                 <option value="---">- {% trans "select a row" %} -</option>
