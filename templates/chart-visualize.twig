@@ -158,6 +158,8 @@ $(function() {
         if (_typeHasChanged || _themeHasChanged) {
             // load new visualization options
             loadOptions();
+            // Works for table chart: you can highlight rows
+            initHighlightRow();
         }
 
         _themeHasChanged = false;
@@ -198,6 +200,7 @@ $(function() {
         return _.isArray(sel) ? sel.slice() : [];
     }
 
+    // Update the graph by removing the clicked serie as highlight
     function highlightSeriesClick(e) {
         var badge    = $(e.target).parents('.badge'),
             series   = badge.data('series'),
@@ -208,8 +211,8 @@ $(function() {
         li.remove();
         e.preventDefault();
     }
-
-     function highlightRowClick(e) {
+    // Update the graph by removing the clicked row as highlight
+    function highlightRowClick(e) {
         var badge    = $(e.target).parents('.badge'),
             row      = badge.data('row'),
             li       = badge,
@@ -224,35 +227,16 @@ $(function() {
     $('.highlighted-series .badge').click(highlightSeriesClick);
     $('.highlighted-rows .badge').click(highlightRowClick);
 
-    function onDatasetLoaded(ds) {
-        // Highlight series
-        var s = $('#highlight-series'), s2 = $('.highlighted-series');
-        s.find("option[value!='---']").remove();
-        // Fill the highlight selectbox with column names
-        _.each(chart.dataSeries(), function(col) {
-            s.append('<option>'+col.name+'</option>');
-        });
-        s.change(function() {
-            if (s.val() != "---") {
-                var selected = _getHighlights();
-                if (_.indexOf(selected, s.val()) >= 0) {
-                    s.val('---');
-                    return;
-                }
-
-                var span = $('<span data-series="'+s.val()+'" class="badge badge-info"><i class="icon-remove icon-white"></i>'+s.val()+'</span>');
-
-                selected.push(s.val());
-
-                chart.set('metadata.visualize.highlighted-series', selected);
-
-                s2.append(span);
-                span.click(highlightSeriesClick);
-                s.val('---');
-            }
-        });
-        // Highlight rows
-        var $highlight_row        = $('#highlight-rows');
+    // initialize the 'highlight a row' selectbox
+    // Only if chart for table chart type
+    function initHighlightRow() {
+        var $highlight_row = $('#highlight-rows');
+        // Only if chart for table chart type
+        if (chart.get('type') != 'data-table') {
+           $highlight_row.hide();
+           return; 
+        }
+        $highlight_row.show();
         var $highlight_row_badges = $('.highlighted-rows');
         var $badge_tmpl           = $("<span data-row=\"\" class=\"badge badge-info\"><i class=\"icon-remove icon-white\"></i></span>");
         // Fill the highlight selectbox with row names
@@ -283,6 +267,37 @@ $(function() {
                 $highlight_row.val('---');
             }
         });
+    }
+
+    function onDatasetLoaded(ds) {
+        // Highlight series
+        var s = $('#highlight-series'), s2 = $('.highlighted-series');
+        s.find("option[value!='---']").remove();
+        // Fill the highlight selectbox with column names
+        _.each(chart.dataSeries(), function(col) {
+            s.append('<option>'+col.name+'</option>');
+        });
+        s.change(function() {
+            if (s.val() != "---") {
+                var selected = _getHighlights();
+                if (_.indexOf(selected, s.val()) >= 0) {
+                    s.val('---');
+                    return;
+                }
+
+                var span = $('<span data-series="'+s.val()+'" class="badge badge-info"><i class="icon-remove icon-white"></i>'+s.val()+'</span>');
+
+                selected.push(s.val());
+
+                chart.set('metadata.visualize.highlighted-series', selected);
+
+                s2.append(span);
+                span.click(highlightSeriesClick);
+                s.val('---');
+            }
+        });
+        // Works for table chart: you can highlight rows
+        initHighlightRow();
         // Update the iframe's size
         _.each(themes, function(theme) {
             if (theme.id == chart.get('theme')) {

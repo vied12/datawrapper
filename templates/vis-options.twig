@@ -165,7 +165,6 @@ $(function() {
             if (chart.get('metadata.visualize.'+key) == undefined){
                 chart.set('metadata.visualize.'+key, opt.default);
             }
-            console.log(opt, key);
             if (opt.type == 'radio') {
                 chart.sync('input[name='+key+']', 'metadata.visualize.'+key);
             } else {
