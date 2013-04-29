@@ -237,34 +237,35 @@ $(function() {
            return; 
         }
         $highlight_row.show();
+        var $highlight_row_select = $highlight_row.find('select');
         var $highlight_row_badges = $('.highlighted-rows');
         var $badge_tmpl           = $("<span data-row=\"\" class=\"badge badge-info\"><i class=\"icon-remove icon-white\"></i></span>"); // Ref: see ".highlighted-rows" element below
         // Fill the highlight selectbox with row names
-        $highlight_row.find("option").remove();
-        $highlight_row.append('<option>---</option>');
+        $highlight_row_select.find("option").remove();
+        $highlight_row_select.append('<option>---</option>');
         _.each(chart.rowLabels(), function(row) {
-            $highlight_row.append('<option>'+row+'</option>');
+            $highlight_row_select.append('<option>'+row+'</option>');
         });
         // Event on row selected: add row as badges, save it.
-        $highlight_row.change(function() {
+        $highlight_row_select.change(function() {
             // If already selected, we do nothing
-            if ($highlight_row.val() != "---") {
+            if ($highlight_row_select.val() != "---") {
                 var selected = _getHighlightsRows();
-                if (_.indexOf(selected, $highlight_row.val()) >= 0) {
-                    $highlight_row.val('---');
+                if (_.indexOf(selected, $highlight_row_select.val()) >= 0) {
+                    $highlight_row_select.val('---');
                     return;
                 }
                 // Add Badge
-                var $badge = $badge_tmpl.clone().attr("data-row", $highlight_row.val());
-                $badge.append($highlight_row.val());
+                var $badge = $badge_tmpl.clone().attr("data-row", $highlight_row_select.val());
+                $badge.append($highlight_row_select.val());
                 $highlight_row_badges.append($badge);
                 // Bind click event
                 $badge.click(highlightRowClick);
                 // Save
-                selected.push($highlight_row.val());
+                selected.push($highlight_row_select.val());
                 chart.set('metadata.visualize.highlighted-rows', selected);
                 // Reset
-                $highlight_row.val('---');
+                $highlight_row_select.val('---');
             }
         });
     }
@@ -539,17 +540,19 @@ $(function() {
                             {% endfor %}
                         </p>
                         <!-- Highlight rows -->
-                        <label>{% trans "Highlight the most import data rows:" %}</label>
-                        <div>
-                            <select id="highlight-rows" class="span2">
-                                <option value="---">- {% trans "select a row" %} -</option>
-                            </select>
+                        <div id="highlight-rows">
+                            <label>{% trans "Highlight the most import data rows:" %}</label>
+                            <div>
+                                <select class="span2">
+                                    <option value="---">- {% trans "select a row" %} -</option>
+                                </select>
+                            </div>
+                            <p class="highlighted-rows">
+                                {% for row in vismeta['highlighted-rows'] %}
+                                <span data-row="{{ row }}" class="badge badge-info"><i class="icon-remove icon-white"></i>{{ row }}</span>
+                                {% endfor %}
+                            </p>
                         </div>
-                        <p class="highlighted-rows">
-                            {% for row in vismeta['highlighted-rows'] %}
-                            <span data-row="{{ row }}" class="badge badge-info"><i class="icon-remove icon-white"></i>{{ row }}</span>
-                            {% endfor %}
-                        </p>
                     </div>
                 </div>
 
