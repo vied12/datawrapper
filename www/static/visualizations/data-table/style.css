@@ -4,6 +4,10 @@
  *
  */
 
+html body.chart {
+    overflow: visible !important;
+}
+
 html body #footer, html body.chart.fullscreen #footer {
     position: relative;
     top: auto;
