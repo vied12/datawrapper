@@ -20,6 +20,31 @@ thumbnails:
 admin_email: hello@datawrapper.de
 log_email: debug@datawrapper.de
 
+## prevent guest from creating charts
+prevent_guest_charts: false
+
+## prevent guests from creating accounts
+## (an admin need to create the account)
+prevent_guest_access: false
+
+## the following links are shown in the footer
+## please link to your own imprint (and not ours)
+footer_links:
+    - title:
+        en: Quick Start
+        de: Schnellstart
+      url: http://docs.datawrapper.de/%lang/quickstart
+    - title:
+        en: Tutorial
+        de: Tutorial
+      url: http://docs.datawrapper.de/%lang/tutorial
+
+## to use a custom home page in your installation
+## uncomment the following setting and create a new
+## Twig template (e.g. my-home.twig) in /templates/custom/
+# custom_home: my-home
+
+
 ## HTTP AUTH (optional)
 ## edit and uncomment if Datawrapper is locked behind HTTP Auth
 # http_auth: username:password

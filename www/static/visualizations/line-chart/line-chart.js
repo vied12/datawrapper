@@ -48,7 +48,6 @@
                 c.rpad = 0;
             }
 
-
             if (me.lineLabelsVisible() && (directLabeling || legend.pos == 'right')) {
                 c.labelWidth = 0;
                 _.each(me.chart.dataSeries(), function(col) {
@@ -135,7 +134,7 @@
                     last_valid_y; // keep the last non-NaN y for direct label position
 
                 _.each(col.data, function(val, i) {
-                    x = scales.x(i);
+                    x = scales.x(me.useDateFormat() ? ds.rowDate(i) : i);
                     y = scales.y(val);
 
                     if (isNaN(y)) {
@@ -404,7 +403,24 @@
             y -= me.__root.offset().top;//me.__root.parent().offset().left;
             // var c = me.__c = me.__c || me.__canvas.paper.circle(0,0,10);
             // c.attr({ cx: x || 0, cy: y || 0 });
-            return Math.min(me.dataset.numRows()-1, Math.max(0, Math.round(me.__scales.x.invert(x))));
+            if (me.useDateFormat()) {
+                var mouse_date = me.__scales.x.invert(x),
+                    min_dist = Number.MAX_VALUE,
+                    closest_row = 0;
+                // find closest date
+                _.each(me.dataset.rowDates(), function(date, i) {
+                    var dist = Math.abs(date.getTime() - mouse_date.getTime());
+                    if (dist < min_dist) {
+                        min_dist = dist;
+                        closest_row = i;
+                    }
+                });
+                return closest_row;
+            }
+            return Math.min(
+                me.dataset.numRows()-1,
+                Math.max(0, Math.round(me.__scales.x.invert(x)))
+            );
         },
 
         getSeriesLineWidth: function(series) {
@@ -432,7 +448,12 @@
         },
 
         xScale: function() {
-            return d3.scale.linear().domain([0, this.dataset.numRows()-1]);
+            var me = this, ds = me.dataset;
+            if (me.useDateFormat()) {
+                return d3.time.scale().domain([ds.rowDate(0), ds.rowDate(ds.numRows()-1)]);
+            } else {
+                return d3.scale.linear().domain([0, ds.numRows()-1]);
+            }
         },
 
         yScale: function() {
@@ -508,6 +529,9 @@
             }
         },
 
+        /*
+         * draws the x-axis
+         */
         xAxis: function() {
             // draw x scale labels
             if (!this.chart.hasRowHeader()) return;
@@ -517,6 +541,8 @@
                 rotate45 = me.get('rotate-x-labels'),
                 labels = me.chart.rowLabels(),
                 k = labels.length-1;
+
+            if (me.useDateFormat()) return me.dateAxis();
 
             var last_label_x = -100, min_label_distance = rotate45 ? 30 : 0;
             _.each(me.chart.rowLabels(), function(val, i) {
@@ -559,7 +585,68 @@
                     var p = c.paper.path('M'+x+','+t+' '+x+','+b).attr(me.theme.verticalGrid);
                 });
             }
+        },
 
+        dateAxis: function() {
+            var me = this,
+                ds = me.dataset,
+                c = me.__canvas,
+                scale = me.__scales.x,
+                tickCount = Math.round(c.w / 75),
+                ticks = scale.ticks(tickCount),
+                fmt = me.dataset.__dateFormat,
+                tickFormat = scale.tickFormat(tickCount),
+                last_month = -1, new_month,
+                last_year = -1, new_year,
+                new_decade, new_quarter,
+                daysDelta = Math.round((ds.rowDate(-1).getTime() - ds.rowDate(0).getTime()) / 86400000);
+
+            function timeFormat(formats) {
+              return function(date) {
+                var i = formats.length - 1, f = formats[i];
+                while (!f[1](date)) f = formats[--i];
+                return f[0](date);
+              };
+            }
+
+            var customTimeFormat = timeFormat([
+              [d3.time.format("%Y"), function() { return true; }],
+              [d3.time.format(daysDelta > 70 ? "%b" : "%B"), function(d) { return d.getMonth() !== 0; }],  // not January
+              [d3.time.format("%d"), function(d) { return d.getDate() != 1; }],  // not 1st of month
+              [d3.time.format(daysDelta > 70 ? "%b %d" : "%B %d"), function(d) { return d.getDate() != 1 && new_month; }],  // not 1st of month
+              //[d3.time.format("%a %d"), function(d) { return d.getDay() && d.getDate() != 1; }],  // not monday
+              [d3.time.format("%I %p"), function(d) { return d.getHours(); }],
+              [d3.time.format("%I:%M"), function(d) { return d.getMinutes(); }],
+              [d3.time.format(":%S"), function(d) { return d.getSeconds(); }],
+              [d3.time.format(".%L"), function(d) { return d.getMilliseconds(); }]
+            ]);
+
+            _.each(ticks, function(date, i) {
+                new_month = date.getMonth() != last_month;
+                new_quarter = new_month && (date.getMonth() % 3 === 0);
+                new_year = date.getFullYear() != last_year;
+                new_decade = new_year && date.getFullYear() % 10 === 0;
+                var x = scale(date),
+                    y = c.h - c.bpad + me.theme.lineChart.xLabelOffset,
+                    lbl = customTimeFormat(date);
+                if (ds.__dateFormat == 'year' && i > 0 && i < ticks.length-1) {
+                    lbl = '’'+String(date.getFullYear()).substr(2);
+                }
+                me.label(x, y, lbl, { align: 'center', cl: 'axis x-axis'});
+                if (
+                    ((daysDelta <= 90 && new_month) ||
+                    (daysDelta > 90 && daysDelta <= 500 && new_quarter) ||
+                    (daysDelta > 500 && daysDelta < 3650 && new_year) ||  // less between two and ten years
+                    (daysDelta >= 3650 && new_decade))  // less between two and ten years
+                ) {
+                    if (me.theme.horizontalGrid) {
+                        me.path('M'+[x, c.h - c.bpad] + 'V' + c.tpad, 'grid')
+                            .attr(me.theme.horizontalGrid);
+                    }
+                }
+                last_month = date.getMonth();
+                last_year = date.getFullYear();
+            });
         },
 
         onMouseMove: function(e) {
@@ -582,11 +669,14 @@
                     });
 
             // update x-label
+            var lx = me.__scales.x(me.useDateFormat() ? me.dataset.rowDate(row) : row),
+                lw = me.labelWidth(me.dataset.rowName(row), 'axis x-axis');
+
             xlabel.text(me.dataset.rowName(row));
             xlabel.attr({
-                x: me.__scales.x(row) - 8,
+                x: lx,
                 y: xLabelTop,
-                w: Math.min(100, c.w / me.chart.numRows())
+                w: lw
             });
 
             var spaghetti = me.chart.dataSeries().length > 9;
@@ -606,7 +696,7 @@
                 lbl.data('row', 0);
                 lbl.text(val);
                 lbl.attr({
-                    x: me.__scales.x(row),
+                    x: lx,
                     y: me.__scales.y(s.data[row]),
                     w: me.labelWidth(val)+10
                 });
@@ -640,7 +730,11 @@
             return;
         },
 
-        hoverSeries: function(series) { }
+        hoverSeries: function(series) { },
+
+        useDateFormat: function() {
+            return this.dataset.hasRowDates();
+        }
 
     });
 

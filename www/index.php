@@ -7,7 +7,7 @@
 
 
 
-define('DATAWRAPPER_VERSION', '1.2.9');  // must be the same as in package.json
+define('DATAWRAPPER_VERSION', '1.2.10-beta');  // must be the same as in package.json
 
 define('ROOT_PATH', '../');
 
@@ -50,8 +50,8 @@ require_once '../lib/utils/i18n.php';
 require_once '../lib/utils/disable_cache.php';
 
 // Load CDN publishing class
-if (!empty($GLOBALS['dw_config']['publish']) && !empty($GLOBALS['dw_config']['publish']['requires'])) {
-    foreach($GLOBALS['dw_config']['publish']['requires'] as $lib) {
+if (!empty($dw_config['publish']) && !empty($dw_config['publish']['requires'])) {
+    foreach($dw_config['publish']['requires'] as $lib) {
         require_once '../' . $lib;
     }
 }
@@ -68,7 +68,15 @@ function add_header_vars(&$page, $active = null) {
 
     $user = DatawrapperSession::getUser();
     $headlinks = array();
-    $headlinks[] = array('url' => '/chart/create', 'id' => 'chart', 'title' => _('Create Chart'), 'icon' => 'pencil');
+    if ($user->isLoggedIn() || empty($config['prevent_guest_charts'])) {
+        $headlinks[] = array(
+            'url' => '/chart/create',
+            'id' => 'chart',
+            'title' => _('Create Chart'),
+            'icon' => 'pencil'
+        );
+    }
+
     if ($user->isLoggedIn() && $user->hasCharts()) {
         $headlinks[] = array('url' => '/mycharts/', 'id' => 'mycharts', 'title' => _('My Charts'), 'icon' => 'signal');
     } else {
@@ -80,26 +88,23 @@ function add_header_vars(&$page, $active = null) {
         if (!empty($item['icon'])) $link['icon'] = $item['icon'];
         $headlinks[] = $link;
     }
-
-    $headlinks[] = array(
-        'url' => '',
-        'id' => 'lang',
-        'dropdown' => array(array(
-            'url' => '#lang-de-DE',
-            'title' => 'Deutsch'
-        ), array(
-            'url' => '#lang-en-GB',
-            'title' => 'English'
-        ), array(
-            'url' => '#lang-fr-FR',
-            'title' => 'Français'
-        ), array(
-            'url' => '#lang-es-ES',
-            'title' => 'Español'
-        )),
-        'title' => _('Language'),
-        'icon' => 'font'
-    );
+    // language dropdown
+    if (!empty($config['languages'])) {
+        $langDropdown = array(
+            'url' => '',
+            'id' => 'lang',
+            'dropdown' => array(),
+            'title' => _('Language'),
+            'icon' => 'font'
+        );
+        foreach ($config['languages'] as $lang) {
+            $langDropdown['dropdown'][] = array(
+                'url' => '#lang-'.$lang['id'],
+                'title' => $lang['title']
+            );
+        }
+        if (count($langDropdown['dropdown']) > 1) $headlinks[] = $langDropdown;
+    }
     if ($user->isLoggedIn()) {
         $shortenedMail = $user->getEmail();
         $shortenedMail = strlen($shortenedMail) > 18 ? substr($shortenedMail, 0, 9).'...'.substr($shortenedMail, strlen($shortenedMail)-9) : $shortenedMail;
@@ -145,6 +150,7 @@ function add_header_vars(&$page, $active = null) {
     $page['DW_VERSION'] = DATAWRAPPER_VERSION;
     $page['DW_CHART_CACHE_DOMAIN'] = $config['chart_domain'];
     $page['ADMIN_EMAIL'] = $config['admin_email'];
+    $page['config'] = $config;
 
     $analyticsMod = get_module('analytics', '../lib/');
     $page['trackingCode'] = !empty($analyticsMod) ? $analyticsMod->getTrackingCode() : '';
@@ -184,6 +190,7 @@ require_once '../lib/utils/errors.php';
 require_once '../lib/utils/check_chart.php';
 require_once '../lib/utils/get_module.php';
 require_once '../controller/home.php';
+require_once '../controller/login.php';
 require_once '../controller/account-settings.php';
 require_once '../controller/account-activate.php';
 require_once '../controller/account-reset-password.php';
@@ -203,16 +210,33 @@ require_once '../controller/docs.php';
 require_once '../controller/gallery.php';
 require_once '../controller/admin.php';
 
+
 $app->notFound(function() {
     error_not_found();
 });
 
 
-if ($GLOBALS['dw_config']['debug']) {
+if ($dw_config['debug']) {
     $app->get('/phpinfo', function() use ($app) {
         phpinfo();
     });
 }
+
+/*
+ * before processing any other route we check if the
+ * user is not logged in and if prevent_guest_access is activated.
+ * if both is true we redirect to /login
+ */
+$app->hook('slim.before.router', function () use ($app, $dw_config) {
+    $user = DatawrapperSession::getUser();
+    if (!$user->isLoggedIn() && !empty($dw_config['prevent_guest_access'])) {
+        $req = $app->request();
+        if ($req->getResourceUri() != '/login') {
+            $app->redirect('/login');
+        }
+    }
+});
+
 
 /**
  * Step 4: Run the Slim application
@@ -222,5 +246,4 @@ if ($GLOBALS['dw_config']['debug']) {
  */
 
 $app->run();
-
 

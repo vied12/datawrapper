@@ -1,6 +1,17 @@
 CHANGELOG
 ---------
 
+### 1.2.10
+* allowed input of named colors
+* ignoring data series by clicking table header
+* made MyCharts page searchable
+* allowed preventing guest access
+* customizable home page
+* customizable languages
+* added roles sysadmin and graphic-editor
+* line chart interprets time series data
+* bugfix: chart editor overrides preferred embed size in visualize step
+
 ### 1.2.9
 * added support for S3 domain alias (e.g. s3.datawrapper.de)
 * added support for S3 endpoints
