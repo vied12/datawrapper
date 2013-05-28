@@ -7,7 +7,7 @@
 
 
 
-define('DATAWRAPPER_VERSION', '1.3.1');  // must be the same as in package.json
+define('DATAWRAPPER_VERSION', '1.3.2');  // must be the same as in package.json
 
 define('ROOT_PATH', '../');
 
@@ -151,6 +151,7 @@ function add_header_vars(&$page, $active = null) {
     $page['DW_CHART_CACHE_DOMAIN'] = $config['chart_domain'];
     $page['ADMIN_EMAIL'] = $config['admin_email'];
     $page['config'] = $config;
+    $page['invert_navbar'] = substr($config['domain'], -4) == '.pro';
 
     $analyticsMod = get_module('analytics', '../lib/');
     $page['trackingCode'] = !empty($analyticsMod) ? $analyticsMod->getTrackingCode() : '';
@@ -231,8 +232,15 @@ $app->hook('slim.before.router', function () use ($app, $dw_config) {
     $user = DatawrapperSession::getUser();
     if (!$user->isLoggedIn() && !empty($dw_config['prevent_guest_access'])) {
         $req = $app->request();
-        if ($req->getResourceUri() != '/login') {
-            $app->redirect('/login');
+
+        if (UserQuery::create()->filterByRole('admin')->count() > 0) {
+            if ($req->getResourceUri() != '/login') {
+                $app->redirect('/login');
+            }
+        } else {
+            if ($req->getResourceUri() != '/setup') {
+                $app->redirect('/setup');
+            }
         }
     }
 });

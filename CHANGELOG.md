@@ -1,6 +1,16 @@
 CHANGELOG
 ---------
 
+### 1.3.2
+* added (optional) higher security for passwords, [read more](https://github.com/datawrapper/datawrapper/wiki/Enabling-secure-auth-key).
+* added page for setting up admin account after fresh install
+* fixed admin dashboard
+* allowed customization of title
+* refactored defaults in config
+* allowed setting default for show_in_gallery
+* enabled inverting the nav bar
+* fixed bar chart display with negative bars
+
 ### 1.3.1
 * allowed changing job status in admin page
 * added job status 'canceled'
