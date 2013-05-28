@@ -82,6 +82,7 @@
                 _.each(s.data, function(number, i) {
                     s.data[i] = numParser.parse(number);
                     if (!isNaN(s.data[i])) {
+                        // this is buggy in IE7
                         s.min = Math.min(s.min, s.data[i]);
                         s.max = Math.max(s.max, s.data[i]);
                         s.total += s.data[i];
@@ -271,17 +272,39 @@
             });
         },
 
-        hasRowDates: function() {
+        /**
+         * Returns true if the datasets row labels could
+         * correctly be parsed as date values.
+         */
+        isTimeSeries: function() {
             return this.__rowDates !== undefined;
         },
 
+        /**
+         * Returns a Date object for a given row.
+         */
         rowDate: function(i) {
-            var k = this.__rowDates.length;
-            return this.__rowDates[(i + k) % k];
+            if (i < 0) i += this.__rowDates.length;
+            return this.__rowDates[i];
         },
 
+        /**
+         * Returns (a copy of) the list of all rows Date objects.
+         */
         rowDates: function() {
             return this.__rowDates.slice(0);
+        },
+
+        /**
+         * Returns array of min/max values
+         */
+        minMax: function() {
+            var minmax = [Number.MAX_VALUE, -Number.MAX_VALUE];
+            this.eachSeries(function(s) {
+                minmax[0] = Math.min(minmax[0], s.min);
+                minmax[1] = Math.max(minmax[1], s.max);
+            });
+            return minmax;
         }
     });
 
@@ -400,9 +423,9 @@
 
             if (!m) return raw;
             switch (fmt) {
-                case 'year': return new Date(m[1]);
-                case 'quarter': return new Date(m[1], (m[2]-1) * 3);
-                case 'month': return new Date(m[1], (m[2]-1));
+                case 'year': return new Date(m[1], 0, 1);
+                case 'quarter': return new Date(m[1], (m[2]-1) * 3, 1);
+                case 'month': return new Date(m[1], (m[2]-1), 1);
                 case 'date': return new Date(m[1], (m[2]-1), m[3]);
             }
             return raw;

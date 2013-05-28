@@ -18,8 +18,8 @@
 
             row = 0;
             if (!_.isUndefined(me.get('selected-row'))) {
-                row = me.get('selected-row');
-                if (row > me.chart.numRows() || row === undefined) row = 0;
+                row = me.get('selected-row', 0);
+                if (row > me.chart.numRows()) row = 0;
             }
 
             filterUI = me.getFilterUI(row);
@@ -75,12 +75,16 @@
                 _.each(series.data, function(val, r) {
                     var d = me.barDimensions(series, s, r);
                     var fill = me.getBarColor(series, r, me.get('negative-color', false)),
-                        stroke = chroma.color(fill).darken(14).hex();
+                        stroke = chroma.color(fill).darken(14).hex(),
                     // create bar
-                    me.registerSeriesElement(c.paper.rect().attr(d).attr({
+                    bar = me.registerSeriesElement(c.paper.rect().attr(d).attr({
                         'stroke': stroke,
                         'fill': fill
                     }).data('strokeCol', stroke), series, r);
+
+                    if (me.theme.columnChart.barAttrs) {
+                        bar.attr(me.theme.columnChart.barAttrs);
+                    }
 
                     var val_y = val > 0 ? d.y - 10 : d.y + d.height + 10,
                         lbl_y = val <= 0 ? d.y - 10 : d.y + d.height + 5,
@@ -201,7 +205,7 @@
                     }
                 });
             });
-            me.__gridLines['0'].toFront();
+            if (me.__gridLines['0']) me.__gridLines['0'].toFront();
         },
 
         getBarColor: function(series, row, useNegativeColor, colorful) {
@@ -244,7 +248,7 @@
 
             cw = (c.w - c.lpad - c.rpad) * (1 - vspace - vspace);
             bw = cw / (n + (n-1) * pad);
-            h = sc.y(val) - sc.y(0);
+            h = Math.max(val !== 0 ? 1 : 0, sc.y(val) - sc.y(0));
             w = Math.round(bw / series.data.length);
             if (h >= 0) {
                 y = c.h - c.bpad - sc.y(0) - h;

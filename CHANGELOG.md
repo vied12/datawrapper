@@ -1,7 +1,14 @@
 CHANGELOG
 ---------
 
-### 1.2.10
+### 1.3.1
+* allowed changing job status in admin page
+* added job status 'canceled'
+* ensured minimum width/height of 1 pixel for bars in bar/column charts
+* allowed customization of logo
+* allowed insertion of custom css
+
+### 1.3.0
 * allowed input of named colors
 * ignoring data series by clicking table header
 * made MyCharts page searchable
@@ -11,6 +18,11 @@ CHANGELOG
 * added roles sysadmin and graphic-editor
 * line chart interprets time series data
 * bugfix: chart editor overrides preferred embed size in visualize step
+* showing translation status in admin pages
+* special date selector for time series shown in 1d charts
+* mycharts: allowed filtering charts by publish status
+* show warning if negative values are displayed in stacked bar charts
+* show values on hover in grouped/stacked bar charts
 
 ### 1.2.9
 * added support for S3 domain alias (e.g. s3.datawrapper.de)
@@ -21,7 +33,6 @@ CHANGELOG
 * changed mysql engine to innodb
 * center preview chart in editor
 * replaced old data table with handsontable widget
-
 
 ### 1.2.8
 * made job execution (e.g. static chart exports) fail safe
