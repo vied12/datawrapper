@@ -4,6 +4,49 @@
     // Simple perfect bar chart
     // -------------------------
 
+    var I18N = {
+        'en': {
+            "sEmptyTable":     "No data available in table",
+            "sInfo":           "Showing _START_ to _END_ of _TOTAL_ entries",
+            "sInfoEmpty":      "Showing 0 to 0 of 0 entries",
+            "sInfoFiltered":   "(filtered from _MAX_ total entries)",
+            "sInfoPostFix":    "",
+            "sInfoThousands":  ",",
+            "sLengthMenu":     "Show _MENU_ entries",
+            "sLoadingRecords": "Loading...",
+            "sProcessing":     "Processing...",
+            "sSearch":         "Search:",
+            "sZeroRecords":    "No matching records found",
+            "oPaginate": {
+                "sFirst":    "First",
+                "sLast":     "Last",
+                "sNext":     "Next",
+                "sPrevious": "Previous"
+            },
+            "oAria": {
+                "sSortAscending":  ": activate to sort column ascending",
+                "sSortDescending": ": activate to sort column descending"
+            }
+        },
+        'de': {
+            "sProcessing":   "Bitte warten...",
+            "sLengthMenu":   "Anzeige von _MENU_ Einträgen",
+            "sZeroRecords":  "Keine Einträge vorhanden.",
+            "sInfo":         "_START_ bis _END_ von _TOTAL_ Einträgen angezeigt",
+            "sInfoEmpty":    "0 bis 0 von 0 Einträgen angezeigt",
+            "sInfoFiltered": "(gefiltert von _MAX_  Einträgen)",
+            "sInfoPostFix":  "",
+            "sSearch":       "Suchen",
+            "sUrl":          "",
+            "oPaginate": {
+                "sFirst":    "Erster",
+                "sPrevious": "Zurück",
+                "sNext":     "Weiter",
+                "sLast":     "Letzter"
+            }
+        }
+    };
+
     var DataTable = Datawrapper.Visualizations.DataTable = function() {
 
     };
@@ -78,12 +121,13 @@
             if (me.get('table-responsive')) {
                 table.addClass('responsive');
             }
-
+            var datatable_i18n = I18N[me.theme.locale.slice(0, 2)] || I18N["en"];
             table.dataTable({
-                "bPaginate": me.get('table-paginate', false),
-                "bInfo": me.get('table-paginate', false),
-                "bFilter": me.get('table-filter', false),
-                "bSort": me.get('table-sortable', false)
+                "bPaginate" : me.get('table-paginate', false),
+                "bInfo"     : me.get('table-paginate', false),
+                "bFilter"   : me.get('table-filter', false),
+                "bSort"     : me.get('table-sortable', false),
+                "oLanguage" : datatable_i18n
             });
 
             el.append('<br style="clear:both"/>');
