@@ -106,16 +106,15 @@
                     }
                 }
                 _.each(me.chart.dataSeries(), function(series, s) {
-                    td = $('<td>'+me.chart.formatValue(series.data[r], true)+'</td>');
+                    var cell_content = me.chart.formatValue(series.data[r], true);
+                    if (cell_content == "n/a") {
+                        cell_content = "&mdash;";
+                    }
+                    td = $('<td>'+cell_content+'</td>');
                     if (isHighlighted(series)) {
                         td.addClass('highlight');
                     }
-                    // if a number add the column's class, else add the type as class
-                    if (typeof(series.data[r]) == "number") {
-                        td.addClass(colType[s]);
-                    } else {
-                        td.addClass(typeof(series.data[r]));
-                    }
+                    td.addClass(colType[s]);
                     td.attr('title', series.name);
                     tr.append(td);
                 });
