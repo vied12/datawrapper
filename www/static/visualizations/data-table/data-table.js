@@ -110,7 +110,12 @@
                     if (isHighlighted(series)) {
                         td.addClass('highlight');
                     }
-                    td.addClass(colType[s]);
+                    // if a number add the column's class, else add the type as class
+                    if (typeof(series.data[r]) == "number") {
+                        td.addClass(colType[s]);
+                    } else {
+                        td.addClass(typeof(series.data[r]));
+                    }
                     td.attr('title', series.name);
                     tr.append(td);
                 });
