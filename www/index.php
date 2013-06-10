@@ -7,7 +7,7 @@
 
 
 
-define('DATAWRAPPER_VERSION', '1.3.2');  // must be the same as in package.json
+define('DATAWRAPPER_VERSION', '1.3.3');  // must be the same as in package.json
 
 define('ROOT_PATH', '../');
 
@@ -165,10 +165,12 @@ function add_header_vars(&$page, $active = null) {
     }
 
     if ($config['debug']) {
-        // parse git branch
-        $head = file_get_contents('../.git/HEAD');
-        $parts = explode("/", $head);
-        $page['BRANCH'] = ' ('.trim($parts[count($parts)-1]).')';
+        if (file_exists('../.git')) {
+            // parse git branch
+            $head = file_get_contents('../.git/HEAD');
+            $parts = explode("/", $head);
+            $page['BRANCH'] = ' ('.trim($parts[count($parts)-1]).')';
+        }
     }
 }
 
@@ -194,6 +196,7 @@ require_once '../controller/home.php';
 require_once '../controller/login.php';
 require_once '../controller/account-settings.php';
 require_once '../controller/account-activate.php';
+require_once '../controller/account-set-password.php';
 require_once '../controller/account-reset-password.php';
 require_once '../controller/chart-create.php';
 require_once '../controller/chart-edit.php';
