@@ -1,8 +1,8 @@
 
 (function(){
 
-    // Simple perfect bar chart
-    // -------------------------
+    // Simple perfect table chart
+    // --------------------------
 
     var I18N = {
         'en': {
@@ -125,7 +125,10 @@
             if (me.get('table-responsive')) {
                 table.addClass('responsive');
             }
-            var datatable_i18n = I18N[me.theme.locale.slice(0, 2)] || I18N["en"];
+
+            var datatable_i18n = (me.theme.meta.locale && I18N[me.theme.meta.locale.slice(0, 2)])? 
+                I18N[me.theme.meta.locale.slice(0, 2)] : I18N["en"];
+            
             table.dataTable({
                 "bPaginate" : me.get('table-paginate', false),
                 "bInfo"     : me.get('table-paginate', false),

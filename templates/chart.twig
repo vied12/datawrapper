@@ -232,6 +232,9 @@
             theme.hpadding = 0;
             thumb = true;
             {% endif %}
+            // Retrieve the theme meta data (meta.json)
+            theme.meta = JSON.parse('{{ theme | json | escape('js') | raw }}');
+
             // initialize chart
             var chart = new Datawrapper.Chart(JSON.parse('{{ chart.toJSON | raw }}'));
             chart.setLocale('{{ chartLocale }}', {{ metricPrefix | json | raw }});
