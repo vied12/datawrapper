@@ -93,6 +93,9 @@ $(function() {
             themeid = $('#select-theme').val(),
             theme = themesById[themeid],
             needed = [themeid];
+        if (!chart.get('metadata.visualize.custom-colors', true)) {
+            picker.hide();
+        }
         while (theme['extends']) {
             needed.unshift(theme['extends']);
             theme = themesById[theme['extends']];
@@ -159,8 +162,9 @@ $(function() {
         if (_typeHasChanged || _themeHasChanged) {
             // load new visualization options
             loadOptions();
-            // Works for table chart: you can highlight rows
-            initHighlightRow();
+            // HACK For TableChart: Should be provided by a Hook
+            // Note: For table chart: you can highlight rows too
+            initTableChartOptions();
         }
 
         _themeHasChanged = false;
@@ -190,6 +194,7 @@ $(function() {
         } else if (key == 'theme') {
             _themeHasChanged = true;
         }
+        // HACK For TableChart: Should be provided by a Hook
         // Highlight series/rows (tableChart):
         // If a serie or row is selected, disable the other type
         if (key == 'metadata.visualize.highlighted-rows' ||
@@ -218,6 +223,7 @@ $(function() {
         li.remove();
         e.preventDefault();
     }
+    // HACK For TableChart: Should be provided by a Hook
     // Update the graph by removing the clicked row as highlight
     function highlightRowClick(e) {
         var badge    = $(e.target).parents('.badge'),
@@ -235,6 +241,7 @@ $(function() {
     $('.highlighted-rows .badge').click(highlightRowClick);
 
 
+    //// HACK For TableChart: Should be provided by a Hook
     // Highlight series/rows (tableChart) :
     // If a serie or row is selected, disable the other type
     function toggleHighlights() {
@@ -246,9 +253,10 @@ $(function() {
         $highlight_row.prop('disabled', (series.length > 0));
     }
 
+    // HACK For TableChart: Should be provided by a Hook
     // initialize the 'highlight a row' selectbox
     // Only for table chart type
-    function initHighlightRow() {
+    function initTableChartOptions() {
         var $highlight_row = $('#highlight-rows');
         // Only for table chart type
         if (chart.get('type') != 'data-table') {
@@ -317,8 +325,8 @@ $(function() {
                 s.val('---');
             }
         });
-        // Works for table chart: you can highlight rows
-        initHighlightRow();
+        // HACK For TableChart: Should be provided by a Hook
+        initTableChartOptions();
         // Update the iframe's size
         _.each(themes, function(theme) {
             if (theme.id == chart.get('theme')) {
@@ -560,6 +568,7 @@ $(function() {
                             <span data-series="{{ series }}" class="badge badge-info"><i class="icon-remove icon-white"></i>{{ series }}</span>
                             {% endfor %}
                         </p>
+                        <!-- HACK For TableChart: Should be provided by a Hook -->
                         <!-- Highlight rows -->
                         <div id="highlight-rows">
                             <label>{% trans "Highlight the most import data rows:" %}</label>

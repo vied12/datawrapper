@@ -19,6 +19,8 @@
     ],
     "order": 70,
     "options": {
+        "custom-color" : {"default":false},
+        "select-color" : {"default":false},
         "table-sortable": {
             "type": "checkbox",
             "label": {

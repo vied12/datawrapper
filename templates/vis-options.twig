@@ -2,19 +2,23 @@
 
 <fieldset>
 
-    <div class="control-group select-color">
-        <label class="control-label" for="select-color">{% trans "Choose a base color" %}</label>
-        <div class="controls">
-            <div id="select-color"></div>
+    {% if not vis.options['select-color'] or vis.options['select-color']["default"]  %}
+        <div class="control-group select-color">
+            <label class="control-label" for="select-color">{% trans "Choose a base color" %}</label>
+            <div class="controls">
+                <div id="select-color"></div>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
-    <div class="control-group">
-        <label class="control-label"></label>
-        <div class="controls">
-            <a class="btn btn-small" role="button" href="#customColors">{% trans "or define custom colors" %}</a>
+    {% if not vis.options['custom-color'] or vis.options['custom-color']["default"]  %}
+        <div class="control-group custom-color">
+            <label class="control-label"></label>
+            <div class="controls">
+                <a class="btn btn-small" role="button" href="#customColors">{% trans "or define custom colors" %}</a>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
     {% if vis.dimensions == 1 %}
     <div class="control-group select-row">
@@ -65,7 +69,9 @@
             </div>
 
         {% else %}
-            <p>Unhandled option type {{ option.type }}</p>
+            <!-- NOTE (Edouard): We don't need to show this message since all options don't affect this list
+            but also others UI elements (like custom-color and select-color) -->
+            <!-- <p>Unhandled option type {{ option.type }}</p> -->
         {% endif %}
     </div>
     {% endif %}{% endfor %}
