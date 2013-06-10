@@ -29,14 +29,6 @@
                 "fr": "Colonnes triables"
             }
         },
-        "table-responsive": {
-            "type": "checkbox",
-            "label": {
-                "en": "Use responsive layout",
-                "de": "Responsives Layout",
-                "fr": "Disposition réactive"
-            }
-        },
         "table-paginate": {
             "type": "checkbox",
             "label": {
