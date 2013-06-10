@@ -32,8 +32,10 @@ html body.chart.fullscreen {
 }
 
 #datatable td, #datatable th {
+    text-align: left;
+    padding-left: 10px;
+    padding-right: 10px;
     border: 0;
-    padding: 6px 3px;
 }
 
 #datatable thead tr {
@@ -72,8 +74,9 @@ html body.chart.fullscreen {
 }
 
 #datatable tbody td {
-    text-align: center;
+    text-align: left;
     padding: 3px 20px;
+    border-left: 1px solid gray;
 }
 
 #datatable tbody tr:last-child
@@ -157,14 +160,21 @@ html body.chart.fullscreen {
     opacity: 1;
 }
 
-#datatable .number,
-#datatable .number-decimal {
+#datatable td.number,
+#datatable td.number-decimal,
+#datatable td.number-small {
     text-align: right;
 }
 
-#datatable .number-small {
-    text-align: center;
+body.chart #chart #datatable td {
+    text-align: left;
 }
+#datatable td.number-small, body.chart #chart #datatable td.number {
+    text-align: right;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 /*
 Max width before this PARTICULAR table gets nasty
 This query will take effect for any screen smaller than 760px
