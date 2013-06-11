@@ -65,7 +65,7 @@
             if (me.chart.hasRowHeader()) {
                 var h = me.dataset.rowNameLabel();
                 if (/^X\.\d+$/.test(h)) h = '';
-                tr.append('<th>'+h+'</tr>');
+                tr.append('<th>'+h+'</th>');
             }
             var colType = [];
             _.each(me.chart.dataSeries(), function(series) {
@@ -114,7 +114,12 @@
                     if (isHighlighted(series)) {
                         td.addClass('highlight');
                     }
-                    td.addClass(colType[s]);
+                    // set a type as classe
+                    if (_.isNumber(series.data[r]))
+                        td.addClass("number");
+                    else if (cell_content == "&mdash;")
+                        td.addClass("not-available");
+                    else if (cell_content == "&mdash;")
                     td.attr('title', series.name);
                     tr.append(td);
                 });

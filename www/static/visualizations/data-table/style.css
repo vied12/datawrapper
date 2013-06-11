@@ -164,6 +164,7 @@ html body.chart.fullscreen {
     text-align: left;
 }
 
+#datatable td.not-available,
 #datatable td.number,
 #datatable td.number-decimal,
 #datatable td.number-small {
