@@ -160,16 +160,13 @@ html body.chart.fullscreen {
     opacity: 1;
 }
 
+#datatable td {
+    text-align: left;
+}
+
 #datatable td.number,
 #datatable td.number-decimal,
 #datatable td.number-small {
-    text-align: right;
-}
-
-body.chart #chart #datatable td {
-    text-align: left;
-}
-#datatable td.number-small, body.chart #chart #datatable td.number {
     text-align: right;
     padding-left: 10px;
     padding-right: 10px;
