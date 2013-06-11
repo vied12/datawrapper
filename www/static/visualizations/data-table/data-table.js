@@ -47,6 +47,10 @@
         }
     };
 
+    var trim = function (myString) {
+        return myString.replace(/^\s+/g,'').replace(/\s+$/g,'')
+    } 
+
     var DataTable = Datawrapper.Visualizations.DataTable = function() {
 
     };
@@ -73,19 +77,16 @@
                 if (isHighlighted(series)) {
                     th.addClass('highlight');
                 }
-                /*if (series.type.substr(0,14) == 'number-decimal') {
-                    colType.push('number-decimal');
-                    th.addClass('number-decimal');
-                } else if (series.type == 'number') {*/
-                    // check for small numbers
-                var small = true;
+                var number_count = 0;
                 _.each(series.data, function(val) {
-                    small = small && val <= 100 && val >= -100;
+                    if (_.isNumber(val)){number_count ++;}
                 });
-                colType.push('number'+(small ? '-small' : ''));
-                th.addClass('number'+(small ? '-small' : ''));
-                //}
-
+                if (number_count > series.data.length/2) {
+                    colType.push('number');
+                    th.addClass('number');
+                } else {
+                    colType.push('string');
+                }
                 tr.append(th);
             });
             $('thead', table).append(tr);
@@ -95,7 +96,7 @@
                 if (me.chart.hasRowHeader()) {
                     tr.append('<th>'+me.chart.rowLabel(r)+'</th>');
                     // Highlight the row
-                    if (_.isArray(highlighted_rows) && _.indexOf(highlighted_rows, me.chart.rowLabel(r)) >= 0) {
+                    if (_.isArray(highlighted_rows) && _.indexOf(highlighted_rows, trim(me.chart.rowLabel(r))) >= 0) {
                         tr.addClass('highlight');
                     }
                 } else { // Highlight the row
@@ -133,18 +134,42 @@
 
             var datatable_i18n = (me.theme.meta.locale && I18N[me.theme.meta.locale.slice(0, 2)])? 
                 I18N[me.theme.meta.locale.slice(0, 2)] : I18N["en"];
-            
+
+            // Functions to sort formated number
+            jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+                "formatted-num-pre": function ( a ) {
+                    a = (a === "—" || a === "") ? -1 : a.replace( /[^\d\-\.]/g, "" );
+                    return parseFloat( a );
+                },
+                "formatted-num-asc": function ( a, b ) {return a - b;},
+                "formatted-num-desc": function ( a, b ) {return b - a;}
+            });
+
+            // set a list of column types for datatable.js (in order to support ordering)
+            var colum_types = [];
+            if (me.chart.hasRowHeader()) {colum_types.push(null);}
+            _.each(colType, function(type, s) {
+                if (type == "number"){
+                    colum_types.push({ "sType": "formatted-num" });
+                }else {
+                    colum_types.push({ "sType": null });
+                }
+
+            });
+
             table.dataTable({
                 "bPaginate" : me.get('table-paginate', false),
                 "bInfo"     : me.get('table-paginate', false),
                 "bFilter"   : me.get('table-filter', false),
                 "bSort"     : me.get('table-sortable', false),
-                "oLanguage" : datatable_i18n
+                "oLanguage" : datatable_i18n,
+                "aoColumns": colum_types
             });
 
             el.append('<br style="clear:both"/>');
         }
 
     });
+
 
 }).call(this);
